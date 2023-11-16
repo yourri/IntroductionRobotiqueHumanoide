@@ -1,17 +1,10 @@
-% 順運動学のデモ　ランダムな姿勢を表示
-% fk_random.m
-% 2004 Dec.17 s.kajita AIST
-
 close all
-clear              % 作業領域のメモリを初期化
-global uLINK       % グローバル変数として，外部関数からの参照を可能にする
+clear              
+global uLINK      
 
-SetupBipedRobot;   % 図2.19，図2.20の2足歩行ロボットのデータを設定
+teamA_setup_darwin;   
 
-%%%%%%%%%%% ランダムな姿勢　%%%%%%%%%%%%
-
-rand('state',0);  %乱数初期状態
-
+rand('state',0);  
 figure
 while 1
     qR1 = 2/3*pi*(rand(6,1)-0.5);  %  -pi/2 < q < pi/2
@@ -21,12 +14,12 @@ while 1
     qL1(4) = pi*rand;          %   0 < q4 < pi 
     
     for n=0:5
-        uLINK(RLEG_J0+n).q = qR1(n+1);
-        uLINK(LLEG_J0+n).q = qL1(n+1);
+        uLINK(MP_ANKLE2_R+n).q = qR1(n+1);
+        uLINK(MP_ANKLE2_L+n).q = qL1(n+1);
     end
     
-    uLINK(BODY).p = [0.0, 0.0, 0.7]';
-    uLINK(BODY).R = eye(3);
+    uLINK(MP_BODY).p = [0.0, 0.0, 0.7]';
+    uLINK(MP_BODY).R = eye(3);
     ForwardKinematics(1);
     
     clf

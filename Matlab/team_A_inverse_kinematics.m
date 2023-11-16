@@ -1,58 +1,76 @@
-% Analytical inverse kinematics with random target
-% fk_random.m
+% Numerical inverse kinematics with random target
+% ik_random2.m
 % 2004 Dec.17 s.kajita AIST
 
 close all
-clear              % clear work space
-global uLINK      
+clear              % claer work space
+global uLINK   
+global Trajx
+global Trajy
+global Trajz
+global zmprefx
+global zmprefy
+global temps_un_pas 
+global Ts
 
-SetupBipedRobot;  
+Ts = 0.01
+teamA_setup_darwin; 
+team_A_ZMP_trajectory;
+% Set the biped robot of Fig.2.19 and Fig.2.20
 
-%%%%%%%%%%% set non singular posture %%%%%%%%%%%%
-uLINK(RLEG_J2).q = -10.0*ToRad;
-uLINK(RLEG_J3).q = 20.0*ToRad;
-uLINK(RLEG_J4).q = -10.0*ToRad;
+athigh = atan(0.04 / 0.093);
+atibia = atan(0.04 / 0.093);
 
-uLINK(LLEG_J2).q = -10.0*ToRad;
-uLINK(LLEG_J3).q = 20.0*ToRad;
-uLINK(LLEG_J4).q = -10.0*ToRad;
+team_A_trajectoire_pied;
 
-uLINK(BODY).p = [0.0, 0.0, 0.7]';
-uLINK(BODY).R = eye(3);
+%%%%%%%%%%% set non singular posture@%%%%%%%%%%%%
+uLINK(MP_THIGH1_L).q = 0.3;
+uLINK(MP_THIGH2_L).q = athigh;
+uLINK(MP_TIBIA_L).q = -(athigh+atibia);
+uLINK(MP_ANKLE1_L).q = -(atibia);
+uLINK(MP_ANKLE2_L).q = (0.3);
 
-%%%%%%%%%%% random target foot position and orientation %%%%%%%%%%%%
+uLINK(MP_THIGH1_R).q = 0.3;
+uLINK(MP_THIGH2_R).q = -athigh;
+uLINK(MP_TIBIA_R).q = (athigh+atibia);
+uLINK(MP_ANKLE1_R).q = (atibia);
+uLINK(MP_ANKLE2_R).q = (0.3);
 
-rand('state',0);
+uLINK(MP_BODY).p = [0.0, 0.0, 0.30]';
+uLINK(MP_BODY).R = eye(3);
 
-figure
-while 1
-    uLINK(BODY).p = [0.0, 0.0, 0.5]';
-    uLINK(BODY).R = eye(3);
+%%%%%%%%%%%random target foot position and orientation %%%%%%%%%%%%
 
-    Rfoot.p = [0, -0.1, 0]' + 0.2*(rand(3,1)-0.5); %%% Au lieu de * random, c'est les valeurs de m-a et julien
-    Rfoot.R = RPY2R(1/2*pi*(rand(3,1)-0.5));  %  -pi/4 < q < pi/4
+ForwardKinematics(1);
 
-    Lfoot.p = [0, 0.1, 0]' + 0.1*(rand(3,1)-0.5);
-    Lfoot.R = RPY2R(1/2*pi*(rand(3,1)-0.5)); %  -pi/4 < q < pi/4
+p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
+p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
 
-    %%% Analytical inverse kinematics solution
-    qR2 = IK_leg(uLINK(BODY),-0.1,0.3,0.3,Rfoot);
-    qL2 = IK_leg(uLINK(BODY), 0.1,0.3,0.3,Lfoot);
-
-    for n=0:5
-        uLINK(RLEG_J0+n).q = qR2(n+1);
-        uLINK(LLEG_J0+n).q = qL2(n+1);
-    end
-
-    ForwardKinematics(1);
+clf
+    DrawAllJoints(1);
+    view(38,10)
+    axis equal
+    zlim([-0.2 1.2])
+    grid on
+for i=1:length(temps_un_pas)
+%     uLINK(MP_BODY).p = [0.0, 0.0, 0.5]';
+%     uLINK(MP_BODY).R = eye(3);
+%     
     
+%     Rfoot.p = p_ankle_r_int + [Trajx(i) Trajy(i) Trajz(i)]';
+%     Rfoot.R = RPY2R(1/2*pi*(rand(3,1)-0.5));  %  -pi/4 < q < pi/4
+%     rerr_norm = InverseKinematics(MP_ANKLE2_R, Rfoot);
+%     
+%     Lfoot.p = p_ankle_l_int + [Trajx(i) Trajy(i) Trajz(i)]';
+%     Lfoot.R = RPY2R(1/2*pi*(rand(3,1)-0.5)); %  -pi/4 < q < pi/4
+%     lerr_norm = InverseKinematics(MP_ANKLE2_L, Lfoot);
+        
     clf
     DrawAllJoints(1);
     view(38,10)
     axis equal
     zlim([-0.2 1.2])
     grid on
-
-    fprintf('Type any key for another pose, Ctrl-C to abort\n');
-    pause
+    
+    java.lang.Trhread.sleep(10)
 end

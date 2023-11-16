@@ -12,7 +12,7 @@ UZ = [0 0 1]';
 %%% a : Axe de rotation b : position selon le parent q: valeur du joint
 uLINK    = struct('name','MP_BODY'    , 'm', 0.97559947, 'sister', 0, 'child', 2, 'b',[0  0  0.2195]','a',UZ,'q',0);
 
-uLINK(2) = struct('name','MP_PELVIS_L' , 'm',  0.167, 'sister', 8, 'child', 3, 'b',[-0.005 0.037 -0.09355]'   ,'a',UZ,'q',0);
+uLINK(2) = struct('name','MP_PELVIS_L' , 'm',  0.167, 'sister', 8, 'child', 3, 'b',[-0.005 0.037 -0.09355]'   ,'a',-UZ,'q',0);
 uLINK(3) = struct('name','MP_THIGH1_L' , 'm',  0.11904336, 'sister', 0, 'child', 4, 'b',[0 0 -0.028652]'   ,'a',-UX,'q',0);
 uLINK(4) = struct('name','MP_THIGH2_L' , 'm',  0.11904336, 'sister', 0, 'child', 5, 'b',[0 0 0]','a',-UY,'q',0);
 uLINK(5) = struct('name','MP_TIBIA_L' , 'm',  0.070309794, 'sister', 0, 'child', 6, 'b',[0 0 -0.093]' ,'a',-UY,'q',0);
