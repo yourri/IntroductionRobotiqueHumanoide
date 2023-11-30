@@ -8,8 +8,8 @@ global comx
 global comy
 global dX
 
-Ts = 0.05;
-Temps_initial = 2;
+Ts = 0.01;
+temps_initial = 2;
 teamA_setup_darwin; 
 team_A_ZMP_trajectory;
 athigh = atan(0.04 / 0.093);
@@ -36,10 +36,14 @@ uLINK(MP_BODY).R = eye(3);
 
 
 ForwardKinematics(1);
-afficher
 index = 1;
 premier_pas = 10;
-while index < length(comx)
+for i=1: temps_initial/Ts
+    A = [uLINK(MP_PELVIS_L).q uLINK(MP_THIGH1_L).q uLINK(MP_THIGH2_L).q uLINK(MP_TIBIA_L).q uLINK(MP_ANKLE1_L).q uLINK(MP_ANKLE2_L).q uLINK(MP_PELVIS_R).q uLINK(MP_THIGH1_R).q uLINK(MP_THIGH2_R).q uLINK(MP_TIBIA_R).q uLINK(MP_ANKLE1_R).q uLINK(MP_ANKLE2_R).q];
+    writematrix(A, 'a.txt', 'WriteMode', 'append', 'Delimiter', '\t');
+end
+
+while index < (single_support + double_support) * 4
     % double support
     for i=1:double_support / Ts
         ForwardKinematics(1);
@@ -54,7 +58,8 @@ while index < length(comx)
         Lfoot.R = RPY2R([0, 0, 0]);
         rerr_norm1 = InverseKinematics(MP_ANKLE2_L, Lfoot) ;
         index = index + 1;
-        afficher
+        A = [uLINK(MP_PELVIS_L).q uLINK(MP_THIGH1_L).q uLINK(MP_THIGH2_L).q uLINK(MP_TIBIA_L).q uLINK(MP_ANKLE1_L).q uLINK(MP_ANKLE2_L).q uLINK(MP_PELVIS_R).q uLINK(MP_THIGH1_R).q uLINK(MP_THIGH2_R).q uLINK(MP_TIBIA_R).q uLINK(MP_ANKLE1_R).q uLINK(MP_ANKLE2_R).q];
+        writematrix(A, 'a.txt', 'WriteMode', 'append', 'Delimiter', ' ');
     end
     
     
@@ -79,7 +84,8 @@ while index < length(comx)
         Lfoot.R = RPY2R([0, 0, 0]);  %  -pi/4 < q < pi/4
         rerr_norm1 = InverseKinematics(MP_ANKLE2_L, Lfoot) ;
         index = index + 1;
-        afficher
+        A = [uLINK(MP_PELVIS_L).q uLINK(MP_THIGH1_L).q uLINK(MP_THIGH2_L).q uLINK(MP_TIBIA_L).q uLINK(MP_ANKLE1_L).q uLINK(MP_ANKLE2_L).q uLINK(MP_PELVIS_R).q uLINK(MP_THIGH1_R).q uLINK(MP_THIGH2_R).q uLINK(MP_TIBIA_R).q uLINK(MP_ANKLE1_R).q uLINK(MP_ANKLE2_R).q];
+        writematrix(A, 'a.txt', 'WriteMode', 'append', 'Delimiter', ' ');
     end
     
     % double support
@@ -96,11 +102,11 @@ while index < length(comx)
         Lfoot.R = RPY2R([0, 0, 0]);
         rerr_norm1 = InverseKinematics(MP_ANKLE2_L, Lfoot) ;
         index = index + 1;
-        afficher
+        A = [uLINK(MP_PELVIS_L).q uLINK(MP_THIGH1_L).q uLINK(MP_THIGH2_L).q uLINK(MP_TIBIA_L).q uLINK(MP_ANKLE1_L).q uLINK(MP_ANKLE2_L).q uLINK(MP_PELVIS_R).q uLINK(MP_THIGH1_R).q uLINK(MP_THIGH2_R).q uLINK(MP_TIBIA_R).q uLINK(MP_ANKLE1_R).q uLINK(MP_ANKLE2_R).q];
+        writematrix(A, 'a.txt', 'WriteMode', 'append', 'Delimiter', ' ');
     end
     
-    % pas droit single support
-
+    % pas gauche single support
     trajectoire_pied_gauche_x = creation_trajectoire_pied_x(p_ankle_l_int(1), p_ankle_l_int(1) + dX, 0, single_support, Ts);
     trajectoire_pied_gauche_z = creation_trajectoire_pied_z(p_ankle_l_int(3), p_ankle_l_int(3), 0, single_support, Ts);
     for i=1:single_support / Ts
@@ -116,23 +122,41 @@ while index < length(comx)
         Rfoot.R = RPY2R([0, 0, 0]);  %  -pi/4 < q < pi/4
         rerr_normr = InverseKinematics(MP_ANKLE2_R, Rfoot) ;
         index = index + 1;
-        afficher
+        A = [uLINK(MP_PELVIS_L).q uLINK(MP_THIGH1_L).q uLINK(MP_THIGH2_L).q uLINK(MP_TIBIA_L).q uLINK(MP_ANKLE1_L).q uLINK(MP_ANKLE2_L).q uLINK(MP_PELVIS_R).q uLINK(MP_THIGH1_R).q uLINK(MP_THIGH2_R).q uLINK(MP_TIBIA_R).q uLINK(MP_ANKLE1_R).q uLINK(MP_ANKLE2_R).q];
+        writematrix(A, 'a.txt', 'WriteMode', 'append', 'Delimiter', ' ');
     end
 end
 
 
-
-%% Fonctions pour la trajectoire]
+% pas gauche single support
+trajectoire_pied_gauche_x = creation_trajectoire_pied_x(p_ankle_l_int(1), p_ankle_l_int(1) + dX /2, 0, single_support, Ts);
+trajectoire_pied_gauche_z = creation_trajectoire_pied_z(p_ankle_l_int(3), p_ankle_l_int(3), 0, single_support, Ts);
+for i=1:single_support / Ts
+    ForwardKinematics(1);
+    p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
+    p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
+    p_body = uLINK(MP_BODY).p;
+    uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) uLINK(MP_BODY).p(3)]';
+    Lfoot.p = [trajectoire_pied_gauche_x(i) p_ankle_l_int(2) trajectoire_pied_gauche_z(i)']';
+    Lfoot.R = RPY2R([0, 0, 0]); 
+    rerr_norml = InverseKinematics(MP_ANKLE2_L, Lfoot);
+    Rfoot.p = [p_ankle_r_int(1) p_ankle_r_int(2) p_ankle_r_int(3)]';
+    Rfoot.R = RPY2R([0, 0, 0]);  %  -pi/4 < q < pi/4
+    rerr_normr = InverseKinematics(MP_ANKLE2_R, Rfoot) ;
+    index = index + 1;
+    A = [uLINK(MP_PELVIS_L).q uLINK(MP_THIGH1_L).q uLINK(MP_THIGH2_L).q uLINK(MP_TIBIA_L).q uLINK(MP_ANKLE1_L).q uLINK(MP_ANKLE2_L).q uLINK(MP_PELVIS_R).q uLINK(MP_THIGH1_R).q uLINK(MP_THIGH2_R).q uLINK(MP_TIBIA_R).q uLINK(MP_ANKLE1_R).q uLINK(MP_ANKLE2_R).q];
+    writematrix(A, 'a.txt', 'WriteMode', 'append', 'Delimiter', ' ');
+end
 
 function afficher
     clf
     DrawAllJoints(1);
-    view(38,10)
+    view([90,0])
     axis equal
     zlim([-0.2 1.2])
     grid on
     fprintf('Type any key for another pose, Ctrl-C to abort\n');
-    pause 
+    pause
 end
 function [trajectoire_pied_x] =  creation_trajectoire_pied_x(Xi, Xf, Ti, Tf, Ts)
     Vix=0;

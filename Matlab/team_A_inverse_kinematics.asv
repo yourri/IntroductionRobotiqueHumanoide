@@ -9,7 +9,7 @@ global comy
 global dX
 
 Ts = 0.05;
-Temps_initial = 2;
+temps_initial = 2;
 teamA_setup_darwin; 
 team_A_ZMP_trajectory;
 athigh = atan(0.04 / 0.093);
@@ -36,24 +36,28 @@ uLINK(MP_BODY).R = eye(3);
 
 
 ForwardKinematics(1);
-afficher
 index = 1;
+premier_pas = 10;
+for i=1: temps_initial/Ts
+    matrice(uLINK)
+end
+
 while index < length(comx)
-    ForwardKinematics(1);
-    p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
-    p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
-    p_body = uLINK(MP_BODY).p;
     % double support
     for i=1:double_support / Ts
-        uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) uLINK(MP_BODY).p(ii]';
+        ForwardKinematics(1);
+        p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
+        p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
+        p_body = uLINK(MP_BODY).p;
+        uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) uLINK(MP_BODY).p(3)]';
         Rfoot.p = [p_ankle_r_int(1) p_ankle_r_int(2) p_ankle_r_int(3)]';
         Rfoot.R = RPY2R([0, 0, 0]); 
         rerr_normr = InverseKinematics(MP_ANKLE2_R, Rfoot);
         Lfoot.p = [p_ankle_l_int(1) p_ankle_l_int(2) p_ankle_l_int(3)]';
-        Lfoot.R = RPY2R([0, 0, 0]);  %  -pi/4 < q < pi/4
+        Lfoot.R = RPY2R([0, 0, 0]);
         rerr_norm1 = InverseKinematics(MP_ANKLE2_L, Lfoot) ;
         index = index + 1;
-        afficher
+        matrice(uLINK)
     end
     
     
@@ -62,40 +66,99 @@ while index < length(comx)
     p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
     p_body = uLINK(MP_BODY).p;
     % pas droit single support
-    if index == 1
+    if premier_pas == 10
         trajectoire_pied_droit_x = creation_trajectoire_pied_x(p_ankle_r_int(1), p_ankle_r_int(1) + dX/2, 0, single_support, Ts);
+        premier_pas = 4132;
     else 
         trajectoire_pied_droit_x = creation_trajectoire_pied_x(p_ankle_r_int(1), p_ankle_r_int(1) + dX, 0, single_support, Ts);
     end
     trajectoire_pied_droit_z = creation_trajectoire_pied_z(p_ankle_r_int(3), p_ankle_r_int(3), 0, single_support, Ts);
     for i=1:single_support / Ts
-        uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) 0]';
-        Rfoot.p = [trajectoire_pied_droit_x(i) 0 trajectoire_pied_droit_z(i)']';
+        uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) uLINK(MP_BODY).p(3)]';
+        Rfoot.p = [trajectoire_pied_droit_x(i) p_ankle_r_int(2) trajectoire_pied_droit_z(i)']';
         Rfoot.R = RPY2R([0, 0, 0]); 
         rerr_normr = InverseKinematics(MP_ANKLE2_R, Rfoot);
         Lfoot.p = [p_ankle_l_int(1) p_ankle_l_int(2) p_ankle_l_int(3)]';
         Lfoot.R = RPY2R([0, 0, 0]);  %  -pi/4 < q < pi/4
         rerr_norm1 = InverseKinematics(MP_ANKLE2_L, Lfoot) ;
         index = index + 1;
-        afficher
+        matrice(uLINK)
     end
-    ForwardKinematics(1);
-    p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
+    
+    % double support
+    for i=1:double_support / Ts
+        ForwardKinematics(1);
+        p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
+        p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
+        p_body = uLINK(MP_BODY).p;
+        uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) uLINK(MP_BODY).p(3)]';
+        Rfoot.p = [p_ankle_r_int(1) p_ankle_r_int(2) p_ankle_r_int(3)]';
+        Rfoot.R = RPY2R([0, 0, 0]); 
+        rerr_normr = InverseKinematics(MP_ANKLE2_R, Rfoot);
+        Lfoot.p = [p_ankle_l_int(1) p_ankle_l_int(2) p_ankle_l_int(3)]';
+        Lfoot.R = RPY2R([0, 0, 0]);
+        rerr_norm1 = InverseKinematics(MP_ANKLE2_L, Lfoot) ;
+        index = index + 1;
+        matrice(uLINK)
+    end
+    
+    % pas gauche single support
+    trajectoire_pied_gauche_x = creation_trajectoire_pied_x(p_ankle_l_int(1), p_ankle_l_int(1) + dX, 0, single_support, Ts);
+    trajectoire_pied_gauche_z = creation_trajectoire_pied_z(p_ankle_l_int(3), p_ankle_l_int(3), 0, single_support, Ts);
+    for i=1:single_support / Ts
+        ForwardKinematics(1);
+        p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
+        p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
+        p_body = uLINK(MP_BODY).p;
+        uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) uLINK(MP_BODY).p(3)]';
+        Lfoot.p = [trajectoire_pied_gauche_x(i) p_ankle_l_int(2) trajectoire_pied_gauche_z(i)']';
+        Lfoot.R = RPY2R([0, 0, 0]); 
+        rerr_norml = InverseKinematics(MP_ANKLE2_L, Lfoot);
+        Rfoot.p = [p_ankle_r_int(1) p_ankle_r_int(2) p_ankle_r_int(3)]';
+        Rfoot.R = RPY2R([0, 0, 0]);  %  -pi/4 < q < pi/4
+        rerr_normr = InverseKinematics(MP_ANKLE2_R, Rfoot) ;
+        index = index + 1;
+        matrice(uLINK)
+    end
 end
 
 
+% pas gauche single support
+trajectoire_pied_gauche_x = creation_trajectoire_pied_x(p_ankle_l_int(1), p_ankle_l_int(1) + dX /2, 0, single_support, Ts);
+trajectoire_pied_gauche_z = creation_trajectoire_pied_z(p_ankle_l_int(3), p_ankle_l_int(3), 0, single_support, Ts);
+for i=1:single_support / Ts
+    ForwardKinematics(1);
+    p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
+    p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
+    p_body = uLINK(MP_BODY).p;
+    uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) uLINK(MP_BODY).p(3)]';
+    Lfoot.p = [trajectoire_pied_gauche_x(i) p_ankle_l_int(2) trajectoire_pied_gauche_z(i)']';
+    Lfoot.R = RPY2R([0, 0, 0]); 
+    rerr_norml = InverseKinematics(MP_ANKLE2_L, Lfoot);
+    Rfoot.p = [p_ankle_r_int(1) p_ankle_r_int(2) p_ankle_r_int(3)]';
+    Rfoot.R = RPY2R([0, 0, 0]);  %  -pi/4 < q < pi/4
+    rerr_normr = InverseKinematics(MP_ANKLE2_R, Rfoot) ;
+    index = index + 1;
+    A = [uLINK(MP_ANKLE2_R).q]
+end
+
 
 %% Fonctions pour la trajectoire]
+function matrice(uLINK)
+
+    
+    A
+end
 
 function afficher
     clf
     DrawAllJoints(1);
-    view(10,38   )
+    view([90,0])
     axis equal
     zlim([-0.2 1.2])
     grid on
     fprintf('Type any key for another pose, Ctrl-C to abort\n');
-    pause 
+    pause
 end
 function [trajectoire_pied_x] =  creation_trajectoire_pied_x(Xi, Xf, Ti, Tf, Ts)
     Vix=0;
