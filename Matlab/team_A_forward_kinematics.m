@@ -13,7 +13,8 @@ atibia = atan(0.4 / 0.093);
 
 
 
-%%%%%%%%%%% set non singular posture@%%%%%%%%%%%%
+%%%%%%%%%%% set non singular po		darwin.goalPos("j_pelvis_r", 	pelvisR, delta_time, rate);
+sture@%%%%%%%%%%%%
 uLINK(MP_THIGH1_L).q = 0.3*ToRad;
 uLINK(MP_THIGH2_L).q = -athigh*ToRad;
 uLINK(MP_TIBIA_L).q = (athigh+atibia)*ToRad;
