@@ -37,20 +37,20 @@ uLINK(MP_BODY).R = eye(3);
 
 ForwardKinematics(1);
 index = 1;
-premier_pas = 10;
+premier_pas = 1;
 for i=1: temps_initial/Ts
     A = [uLINK(MP_PELVIS_R).q uLINK(MP_THIGH1_R).q uLINK(MP_THIGH2_R).q uLINK(MP_TIBIA_R).q uLINK(MP_ANKLE1_R).q uLINK(MP_ANKLE2_R).q uLINK(MP_PELVIS_L).q uLINK(MP_THIGH1_L).q uLINK(MP_THIGH2_L).q uLINK(MP_TIBIA_L).q uLINK(MP_ANKLE1_L).q uLINK(MP_ANKLE2_L).q]; 
     writematrix(A, '/mnt/home/usager/robm2725/Simulation_rob_humanoide/Darwin_Gazebo_GEI845/Darwin_Gazebo/src/darwin_control/src/test.txt', 'WriteMode', 'append', 'Delimiter', '\t');
 end
 trajectoire_pied_x_total_gauche = [];
 trajectoire_pied_x_total_droit = [];
-while index < (single_support/Ts + double_support/Ts) * 8
+while index < (single_support/Ts + double_support/Ts) * 7
     % double support
     for i=1:(double_support / Ts) 
         ForwardKinematics(1);
         p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
         p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
-        uLINK(MP_BODY).p = [comx(index) comy(index) uLINK(MP_BODY).p(3)]';
+        uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) uLINK(MP_BODY).p(3)]';
         Rfoot.p = [p_ankle_r_int(1) p_ankle_r_int(2) p_ankle_r_int(3)]';
         Rfoot.R = RPY2R([0, 0, 0]); 
         rerr_normr = InverseKinematics_CL(MP_ANKLE2_R, Rfoot);
@@ -77,9 +77,9 @@ while index < (single_support/Ts + double_support/Ts) * 8
     p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
     p_body = uLINK(MP_BODY).p;
     % pas droit single support
-    if premier_pas == 10
+    if premier_pas == 1
         trajectoire_pied_droit_x = creation_trajectoire_pied_x(p_ankle_r_int(1), p_ankle_r_int(1) + dX, 0, single_support, Ts);
-        premier_pas = 4132;
+        premier_pas = 0;
     else 
         trajectoire_pied_droit_x = creation_trajectoire_pied_x(p_ankle_r_int(1), p_ankle_r_int(1) + dX * 2, 0, single_support, Ts);
     end
@@ -87,7 +87,12 @@ while index < (single_support/Ts + double_support/Ts) * 8
 %     figure
 %     plot(trajectoire_pied_droit_x)
 %     pause 
+    % pas droit
     trajectoire_pied_droit_z = creation_trajectoire_pied_z(p_ankle_r_int(3), p_ankle_r_int(3), 0, single_support, Ts);
+%         figure
+%     plot(trajectoire_pied_droit_z)
+%     title('droit')
+    
     for i=1:single_support / Ts + 1
         ForwardKinematics(1);
         p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
@@ -106,7 +111,6 @@ while index < (single_support/Ts + double_support/Ts) * 8
         trajectoire_pied_x_total_gauche = [trajectoire_pied_x_total_gauche trajectoire_pied_x_total_gauche(end)];
         trajectoire_pied_x_total_droit = [trajectoire_pied_x_total_droit trajectoire_pied_droit_x(i)];
     end
-    
     % double support
     for i=1:double_support / Ts
         ForwardKinematics(1);
@@ -125,19 +129,23 @@ while index < (single_support/Ts + double_support/Ts) * 8
         A = [uLINK(MP_PELVIS_R).q uLINK(MP_THIGH1_R).q uLINK(MP_THIGH2_R).q uLINK(MP_TIBIA_R).q uLINK(MP_ANKLE1_R).q uLINK(MP_ANKLE2_R).q uLINK(MP_PELVIS_L).q uLINK(MP_THIGH1_L).q uLINK(MP_THIGH2_L).q uLINK(MP_TIBIA_L).q uLINK(MP_ANKLE1_L).q uLINK(MP_ANKLE2_L).q]; 
         writematrix(A, '/mnt/home/usager/robm2725/Simulation_rob_humanoide/Darwin_Gazebo_GEI845/Darwin_Gazebo/src/darwin_control/src/test.txt', 'WriteMode', 'append', 'Delimiter', '\t');
         trajectoire_pied_x_total_gauche = [trajectoire_pied_x_total_gauche trajectoire_pied_x_total_gauche(end)];
-        trajectoire_pied_x_total_droit = [trajectoire_pied_x_total_droit trajectoire_pied_x_total_gauche(end)];
+        trajectoire_pied_x_total_droit = [trajectoire_pied_x_total_droit trajectoire_pied_x_total_droit(end)];
     end
     
     % pas gauche single support
-    trajectoire_pied_droit_x = creation_trajectoire_pied_x(p_ankle_l_int(1), p_ankle_l_int(1) + dX * 2, 0, single_support, Ts);
-    trajectoire_pied_droit_z = creation_trajectoire_pied_z(p_ankle_l_int(3), p_ankle_l_int(3), 0, single_support, Ts);
+    trajectoire_pied_gauche_x = creation_trajectoire_pied_x(p_ankle_l_int(1), p_ankle_l_int(1) + dX * 2, 0, single_support, Ts);
+    trajectoire_pied_gauche_z = creation_trajectoire_pied_z(p_ankle_l_int(3), p_ankle_l_int(3), 0, single_support, Ts);
+%     figure
+%     plot(trajectoire_pied_gauche_z)
+%       title('gauche')
+  
     for i=1:single_support / Ts
         ForwardKinematics(1);
         p_ankle_r_int = uLINK(MP_ANKLE2_R).p;
         p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
         p_body = uLINK(MP_BODY).p;
         uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) uLINK(MP_BODY).p(3)]';
-        Lfoot.p = [trajectoire_pied_droit_x(i) p_ankle_l_int(2) trajectoire_pied_droit_z(i)']';
+        Lfoot.p = [trajectoire_pied_gauche_x(i) p_ankle_l_int(2) trajectoire_pied_gauche_z(i)']';
         Lfoot.R = RPY2R([0, 0, 0]); 
         rerr_norml = InverseKinematics_CL(MP_ANKLE2_L, Lfoot);
         Rfoot.p = [p_ankle_r_int(1) p_ankle_r_int(2) p_ankle_r_int(3)]';
@@ -147,15 +155,14 @@ while index < (single_support/Ts + double_support/Ts) * 8
         afficher
         A = [uLINK(MP_PELVIS_R).q uLINK(MP_THIGH1_R).q uLINK(MP_THIGH2_R).q uLINK(MP_TIBIA_R).q uLINK(MP_ANKLE1_R).q uLINK(MP_ANKLE2_R).q uLINK(MP_PELVIS_L).q uLINK(MP_THIGH1_L).q uLINK(MP_THIGH2_L).q uLINK(MP_TIBIA_L).q uLINK(MP_ANKLE1_L).q uLINK(MP_ANKLE2_L).q]; 
         writematrix(A, '/mnt/home/usager/robm2725/Simulation_rob_humanoide/Darwin_Gazebo_GEI845/Darwin_Gazebo/src/darwin_control/src/test.txt', 'WriteMode', 'append', 'Delimiter', '\t');
-        trajectoire_pied_x_total_gauche = [trajectoire_pied_x_total_gauche trajectoire_pied_droit_x(i)];
-        trajectoire_pied_x_total_droit = [trajectoire_pied_x_total_droit trajectoire_pied_x_total_gauche(end)];
+        trajectoire_pied_x_total_gauche = [trajectoire_pied_x_total_gauche trajectoire_pied_gauche_x(i)];
+        trajectoire_pied_x_total_droit = [trajectoire_pied_x_total_droit trajectoire_pied_x_total_droit(end)];
     end
 end
 
-
 % pas gauche single support
-trajectoire_pied_droit_x = creation_trajectoire_pied_x(p_ankle_r_int(1), p_ankle_r_int(1) + dX, 0, single_support, Ts);
-trajectoire_pied_droit_z = creation_trajectoire_pied_z(p_ankle_r_int(3), p_ankle_r_int(3), 0, single_support, Ts);
+trajectoire_pied_gauche_x = creation_trajectoire_pied_x(p_ankle_l_int(1), p_ankle_l_int(1) + dX, 0, single_support, Ts);
+trajectoire_pied_gauche_z = creation_trajectoire_pied_z(p_ankle_l_int(3), p_ankle_l_int(3), 0, single_support, Ts);
 for i=1:single_support / Ts
     if  index > length(comx)
         break
@@ -165,7 +172,7 @@ for i=1:single_support / Ts
     p_ankle_l_int = uLINK(MP_ANKLE2_L).p;
     p_body = uLINK(MP_BODY).p;
     uLINK(MP_BODY).p = [comx(index)+0.015 comy(index) uLINK(MP_BODY).p(3)]';
-    Rfoot.p = [trajectoire_pied_droit_x(i) p_ankle_r_int(2) trajectoire_pied_droit_z(i)']';
+    Rfoot.p = [trajectoire_pied_gauche_x(i) p_ankle_r_int(2) trajectoire_pied_gauche_z(i)']';
     Rfoot.R = RPY2R([0, 0, 0]); 
     rerr_norml = InverseKinematics_CL(MP_ANKLE2_R, Rfoot);
     Lfoot.p = [p_ankle_l_int(1) p_ankle_l_int(2) p_ankle_l_int(3)]';
@@ -175,17 +182,17 @@ for i=1:single_support / Ts
     afficher
     A = [uLINK(MP_PELVIS_R).q uLINK(MP_THIGH1_R).q uLINK(MP_THIGH2_R).q uLINK(MP_TIBIA_R).q uLINK(MP_ANKLE1_R).q uLINK(MP_ANKLE2_R).q uLINK(MP_PELVIS_L).q uLINK(MP_THIGH1_L).q uLINK(MP_THIGH2_L).q uLINK(MP_TIBIA_L).q uLINK(MP_ANKLE1_L).q uLINK(MP_ANKLE2_L).q]; 
     writematrix(A, '/mnt/home/usager/robm2725/Simulation_rob_humanoide/Darwin_Gazebo_GEI845/Darwin_Gazebo/src/darwin_control/src/test.txt', 'WriteMode', 'append', 'Delimiter', '\t');
-            trajectoire_pied_x_total_gauche = [trajectoire_pied_x_total_gauche trajectoire_pied_droit_x(i)];
-        trajectoire_pied_x_total_droit = [trajectoire_pied_x_total_droit trajectoire_pied_x_total_gauche(end)];
+    trajectoire_pied_x_total_gauche = [trajectoire_pied_x_total_gauche trajectoire_pied_gauche_x(i)];
+    trajectoire_pied_x_total_droit = [trajectoire_pied_x_total_droit trajectoire_pied_x_total_droit(end)];
 end
 % 
-% figure
-% %plot(tplot, trajectoire_pied_x_total_gauche)
-% hold on
-% plot(tplot, trajectoire_pied_x_total_droit)
-% plot(tplot, comx)
-% plot(tplot, zmprefx)
-% legend("gauche", "droit", "com", "zmprefx")
+figure
+plot(tplot, trajectoire_pied_x_total_gauche)
+hold on
+plot(tplot, trajectoire_pied_x_total_droit)
+plot(tplot, comx)
+plot(tplot, zmprefx)
+legend("gauche", "droit", "com", "zmprefx")
 
 function afficher
 %     clf
@@ -229,7 +236,7 @@ end
 
 function trajectoire_pied_Z = creation_trajectoire_pied_z(Zi, Zf, Ti, Tf, Ts)
     deltaZ = Zf - Zi;
-    zmax = 0.03;
+    zmax = 0.02;
 
     Viz = 0;
     Vfz = 0; % mètres par seconde
